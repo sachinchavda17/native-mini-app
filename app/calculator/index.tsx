@@ -1,7 +1,7 @@
 import * as Haptics from "expo-haptics";
 import { useReducer } from "react";
 import { Animated, Text, View } from "react-native";
-import CalcButton from "./components/CalcBtn";
+import CalcButton from "../components/CalcBtn";
 import { Stack } from "expo-router";
 
 export default function CalculatorScreen() {
@@ -232,8 +232,9 @@ export default function CalculatorScreen() {
               key={rowIndex}
               style={{ flexDirection: "row", flexWrap: "wrap" }}
             >
-              {row.map((btn) => (
+              {row.map((btn, index) => (
                 <CalcButton
+                  key={index}
                   label={btn}
                   isActive={state.operator === btn}
                   isEqual={btn === "="}
