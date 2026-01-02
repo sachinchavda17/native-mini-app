@@ -1,165 +1,20 @@
 import * as Haptics from "expo-haptics";
-import { useReducer } from "react";
+import { Stack } from "expo-router";
+import { useRef, useState } from "react";
 import { Animated, Text, View } from "react-native";
 import CalcButton from "../components/CalcBtn";
-import { Stack } from "expo-router";
+import { styles } from "../styles/calc";
 
 export default function CalculatorScreen() {
-  type CalcState = {
-    input: string;
-    operation: string;
-    previousValue: string | null;
-    operator: string | null;
-    result: string;
-  };
+  const [expression, setExpression] = useState("");
+  const [current, setCurrent] = useState("");
+  const [result, setResult] = useState("");
 
-  const initialState: CalcState = {
-    input: "",
-    operation: "",
-    previousValue: null,
-    operator: null,
-    result: "",
-  };
+  const displayValue = result || current || "0";
 
-  type CalcAction =
-    | { type: "PRESS_NUMBER"; payload: string }
-    | { type: "PRESS_OPERATOR"; payload: string }
-    | { type: "PRESS_EQUAL" }
-    | { type: "CLEAR" }
-    | { type: "BACKSPACE" };
+  const resultScale = useRef(new Animated.Value(1)).current;
 
-  function calculatorReducer(state: CalcState, action: CalcAction): CalcState {
-    switch (action.type) {
-      case "PRESS_NUMBER": {
-        const btn = action.payload;
-
-        // Start fresh after result
-        if (state.result) {
-          return {
-            ...initialState,
-            input: btn === "." ? "0." : btn,
-          };
-        }
-
-        if (btn === "." && state.input.includes(".")) return state;
-
-        if (state.input === "0" && btn !== ".") {
-          return {
-            ...state,
-            input: btn,
-            operation: state.operation.slice(0, -1) + btn,
-          };
-        }
-
-        return {
-          ...state,
-          input: state.input + btn,
-          operation: state.operation + btn,
-        };
-      }
-
-      case "PRESS_OPERATOR": {
-        const btn = action.payload;
-
-        if (state.operator && !state.input) {
-          // replace operator instead of stacking
-          return {
-            ...state,
-            operator: btn,
-            operation: state.operation.slice(0, -1) + btn,
-          };
-        }
-
-        // Continue from result
-        if (state.result) {
-          return {
-            ...state,
-            previousValue: state.result,
-            operator: btn,
-            operation: state.result + btn,
-            input: "",
-            result: "",
-          };
-        }
-
-        if (!state.input) return state;
-
-        return {
-          ...state,
-          previousValue: state.input,
-          operator: btn,
-          operation: state.operation + btn,
-          input: "",
-        };
-      }
-
-      case "PRESS_EQUAL": {
-        if (!state.previousValue || !state.operator || !state.input)
-          return state;
-
-        const a = parseFloat(state.previousValue);
-        const b = parseFloat(state.input);
-
-        let res = 0;
-        switch (state.operator) {
-          case "+":
-            res = a + b;
-            break;
-          case "-":
-            res = a - b;
-            break;
-          case "*":
-            res = a * b;
-            break;
-          case "/":
-            res = b !== 0 ? a / b : 0;
-            break;
-          case "%":
-            res = a * (b / 100);
-            break;
-        }
-
-        res = Number(res.toFixed(7));
-
-        return {
-          ...state,
-          result: res.toString(),
-          previousValue: null,
-          operator: null,
-          input: "",
-        };
-      }
-
-      case "BACKSPACE": {
-        if (state.result) {
-          return {
-            ...state,
-            result: "",
-            operation: "",
-          };
-        }
-
-        if (!state.input) return state;
-
-        return {
-          ...state,
-          input: state.input.slice(0, -1),
-          operation: state.operation.slice(0, -1),
-        };
-      }
-
-      case "CLEAR":
-        return initialState;
-
-      default:
-        return state;
-    }
-  }
-
-  const [state, dispatch] = useReducer(calculatorReducer, initialState);
-  const resultScale = new Animated.Value(1);
-
-  if (state.result) {
+  const animateResult = () => {
     Animated.sequence([
       Animated.timing(resultScale, {
         toValue: 1.15,
@@ -172,106 +27,200 @@ export default function CalculatorScreen() {
         useNativeDriver: true,
       }),
     ]).start();
-  }
+  };
+
+  const handleNumberPress = (btn: string) => {
+    if (result) {
+      setResult("");
+      setExpression("");
+      if (btn === ".") setCurrent("0.");
+      else if (btn === "00") setCurrent("0");
+      else setCurrent(btn);
+      return;
+    }
+
+    if (btn === ".") {
+      if (current.includes(".")) return;
+      setCurrent((prev) => (prev === "" ? "0." : prev + "."));
+      return;
+    }
+
+    if (btn === "00") {
+      if (current === "" || current === "0") setCurrent("0");
+      else setCurrent((prev) => prev + "00");
+      return;
+    }
+
+    if (current.length >= 15) return;
+
+    if (current === "0") setCurrent(btn);
+    else setCurrent((prev) => prev + btn);
+  };
+
+  const evaluateExpression = (expr: string): string => {
+    try {
+      const tokens = expr.trim().split(/\s+/);
+      if (tokens.length === 0) return "0";
+
+      let res = parseFloat(tokens[0]);
+      if (isNaN(res)) return "Error";
+
+      for (let i = 1; i < tokens.length; i += 2) {
+        const op = tokens[i];
+        const valStr = tokens[i + 1];
+
+        if (!valStr && op !== "%") break;
+
+        const val = parseFloat(valStr);
+
+        switch (op) {
+          case "+":
+            res += val;
+            break;
+          case "-":
+            res -= val;
+            break;
+          case "*":
+            res *= val;
+            break;
+          case "/":
+            if (val === 0) return "Error";
+            res /= val;
+            break;
+          case "%":
+            // Percentage logic: if it's the last token or followed by another op
+            // e.g., "100 + 10 %" -> 100 + (100 * 0.1) = 110
+            // e.g., "100 * 10 %" -> 100 * 0.1 = 10
+            // For simplicity in this UI, we'll treat % as (prev * (current/100))
+            // but the tokens are [100, +, 10, %].
+            // Let's use a simpler rule: val % means (val/100)
+            if (i > 0) {
+              const prevOp = tokens[i - 1];
+              if (prevOp === "+" || prevOp === "-") {
+                // 100 + 10% = 100 + (100 * 0.1)
+                // But our loop already added 10 to res if we are at %
+                // This is tricky. Let's stick to a simpler left-to-right:
+                // 100 + 10 = 110, then 110 % = 1.1
+                res = res / 100;
+              } else {
+                res = res / 100;
+              }
+            } else {
+              res = res / 100;
+            }
+            i--; // % only consumed itself in this logic
+            break;
+        }
+      }
+      return Number(res.toFixed(7)).toString();
+    } catch (e) {
+      return "Error";
+    }
+  };
+
+  const handleOperatorPress = (op: string) => {
+    if (result && result !== "Error") {
+      setExpression(result + " " + op + " ");
+      setResult("");
+      setCurrent("");
+      return;
+    }
+
+    if (!current && !expression) return;
+
+    if (current) {
+      const normalizedCurrent = current === "." ? "0" : current;
+      setExpression((prev) => prev + normalizedCurrent + " " + op + " ");
+      setCurrent("");
+    } else if (expression) {
+      setExpression((prev) => prev.trim().split(" ").slice(0, -1).join(" ") + " " + op + " ");
+    }
+  };
+
+  const handleEqualPress = () => {
+    if (!current && !expression) return;
+
+    const finalExpr = expression + (current || "");
+    const res = evaluateExpression(finalExpr);
+
+    setExpression(finalExpr);
+    setResult(res);
+    setCurrent("");
+    animateResult();
+  };
+
+  const clearAll = () => {
+    setExpression("");
+    setCurrent("");
+    setResult("");
+  };
+
+  const handleBackspace = () => {
+    if (result) {
+      setResult("");
+      setExpression("");
+      return;
+    }
+    if (current) {
+      setCurrent((prev) => prev.slice(0, -1));
+    } else if (expression) {
+      const tokens = expression.trim().split(" ");
+      tokens.pop(); // Remove operator
+      setExpression(tokens.join(" ") + (tokens.length > 0 ? " " : ""));
+    }
+  };
 
   const buttons = [
-    ["C", "⌫", "%", "/"],
+    ["AC", "⌫", "%", "/"],
     ["7", "8", "9", "*"],
     ["4", "5", "6", "-"],
     ["1", "2", "3", "+"],
     ["0", "00", ".", "="],
   ];
 
+  const handleBtnPress = (btn: string) => {
+    if (!isNaN(Number(btn)) || btn === "." || btn === "00") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      handleNumberPress(btn);
+    } else if (["+", "-", "*", "/", "%"].includes(btn)) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      handleOperatorPress(btn);
+    } else if (btn === "=") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      handleEqualPress();
+    } else if (btn === "AC") {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      clearAll();
+    } else if (btn === "⌫") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      handleBackspace();
+    }
+  };
+
   return (
     <>
       <Stack.Screen options={{ title: "Calculator" }} />
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "#f5f5f5",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: 20,
-        }}
-      >
-        <View
-          style={{
-            flex: 1,
-            width: "100%",
-            backgroundColor: "#fff",
-            padding: 20,
-            marginBottom: 10,
-            borderWidth: 1,
-            borderColor: "#ddd",
-            justifyContent: "flex-end",
-            alignItems: "flex-end",
-          }}
-        >
-          {!!state.result && (
-            <Animated.Text
-              style={{
-                fontSize: 50,
-                transform: [{ scale: resultScale }],
-              }}
-            >
-              {state.result}
-            </Animated.Text>
-          )}
-          {!!state.operation && (
-            <Text style={{ flex: 1, color: "#000", fontSize: 45 }}>
-              {state.operation}
+
+      <View style={{ flex: 1, backgroundColor: "#f5f5f5", padding: 20 }}>
+        {/* Display */}
+        <View style={styles.display}>
+          {!!expression && (
+            <Text numberOfLines={1} ellipsizeMode="head" style={{ fontSize: 20, color: "#888", marginBottom: 6 }}>
+              {expression}
             </Text>
           )}
-          <Text style={{ flex: 1, color: "#000", fontSize: 40 }}>
-            {state.input ? state.input : "0"}
-          </Text>
+
+          <Animated.Text numberOfLines={1} adjustsFontSizeToFit style={{ fontSize: 56, fontWeight: "600", transform: [{ scale: resultScale }] }}>
+            {displayValue}
+          </Animated.Text>
         </View>
-        <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-          {buttons.map((row, rowIndex) => (
-            <View
-              key={rowIndex}
-              style={{ flexDirection: "row", flexWrap: "wrap" }}
-            >
-              {row.map((btn, index) => (
-                <CalcButton
-                  key={index}
-                  label={btn}
-                  isActive={state.operator === btn}
-                  isEqual={btn === "="}
-                  onPress={() => {
-                    // Numbers
-                    if (!isNaN(Number(btn)) || btn === "." || btn === "00") {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      dispatch({ type: "PRESS_NUMBER", payload: btn });
-                    }
 
-                    // Operators
-                    else if (["+", "-", "*", "/", "%"].includes(btn)) {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                      dispatch({ type: "PRESS_OPERATOR", payload: btn });
-                    }
-
-                    // Equal
-                    else if (btn === "=") {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-                      dispatch({ type: "PRESS_EQUAL" });
-                    }
-
-                    // Clear
-                    else if (btn === "C") {
-                      Haptics.notificationAsync(
-                        Haptics.NotificationFeedbackType.Warning
-                      );
-                      dispatch({ type: "CLEAR" });
-                    }
-
-                    // Backspace
-                    else if (btn === "⌫") {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                      dispatch({ type: "BACKSPACE" });
-                    }
-                  }}
-                />
+        {/* Buttons */}
+        <View style={{ width: "100%" }}>
+          {buttons.map((row, rIdx) => (
+            <View key={rIdx} style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 6 }}>
+              {row.map((btn, bIdx) => (
+                <CalcButton key={bIdx} label={btn} isEqual={btn === "="} onPress={() => handleBtnPress(btn)} />
               ))}
             </View>
           ))}
@@ -280,3 +229,4 @@ export default function CalculatorScreen() {
     </>
   );
 }
+

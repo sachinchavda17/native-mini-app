@@ -1,22 +1,13 @@
 import { Animated, Pressable, Text } from "react-native";
+import { useRef } from "react";
 import { styles } from "../styles/calc";
 
-export default function CalcButton({
-  label,
-  onPress,
-  isActive,
-  isEqual,
-}: {
-  label: string;
-  onPress: () => void;
-  isActive?: boolean;
-  isEqual?: boolean;
-}) {
-  const scale = new Animated.Value(1);
+export default function CalcButton({ label, onPress, isEqual }: { label: string; onPress: () => void; isEqual?: boolean }) {
+  const scale = useRef(new Animated.Value(1)).current;
 
   const pressIn = () => {
     Animated.spring(scale, {
-      toValue: 0.92,
+      toValue: 0.88,
       useNativeDriver: true,
     }).start();
   };
@@ -24,28 +15,18 @@ export default function CalcButton({
   const pressOut = () => {
     Animated.spring(scale, {
       toValue: 1,
-      friction: 3,
+      friction: 4,
       useNativeDriver: true,
     }).start();
-
     onPress();
   };
-
-  
 
   return (
     <Animated.View style={{ transform: [{ scale }] }}>
       <Pressable onPressIn={pressIn} onPressOut={pressOut}>
-        <Text
-          style={[
-            styles.text,
-            isActive && styles.operatorActive,
-            isEqual && styles.equal,
-          ]}
-        >
-          {label}
-        </Text>
+        <Text style={[styles.button, isEqual && styles.equal]}>{label}</Text>
       </Pressable>
     </Animated.View>
   );
 }
+
