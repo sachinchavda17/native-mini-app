@@ -26,10 +26,11 @@ This project is focused on learning **real-world mobile app architecture**, navi
 
 ### 💸 Expense Tracker
 
-- **Smart Tracking**: Add daily expenses with category selection and date picker.
-- **Calculations**: Automatic total expense calculation.
-- **Persistence**: **Offline persistence using AsyncStorage**.
-- **Reliable**: Data remains after app restart (clears only on uninstall).
+- **Premium UI**: Modern summary card, category-specific icons, and a floating action button (FAB).
+- **Smart Tracking**: Add daily expenses with an intuitive category grid selection and date picker.
+- **Management**: View recent transactions in a clean list and **delete expenses** with a native confirmation dialog.
+- **Calculations**: Automatic real-time total expense calculation.
+- **Persistence**: Full offline persistence using **AsyncStorage**.
 
 ---
 
@@ -54,10 +55,11 @@ Download the latest Android APK from GitHub Releases:
 
 ## 🧠 Architecture Highlights
 
-- Expo Router for file-based navigation
-- Feature-scoped layouts
-- Context API for state management
-- AsyncStorage for offline persistence
+- **Expo Router**: File-based navigation for a clean app structure.
+- **Context API**: Centralized state management for features like Expenses.
+- **AsyncStorage**: Reliable offline persistence for all user data.
+- **Centralized Styling**: Modular style definitions separated from components for better maintainability.
+- **Feature-scoped Layouts**: Using Expo Router layouts to wrap features with necessary providers.
 
 ## 📁 Project Structure
 
@@ -68,6 +70,7 @@ app/
 ├─ calculator/            # Calculator mini app
 ├─ expense/               # Expense tracker
 ├─ context/               # Context providers (Expense, etc.)
+├─ styles/                # Centralized modular styles
 └─ constants/             # App-wide constants
 ```
 

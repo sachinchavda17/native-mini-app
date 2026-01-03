@@ -1,0 +1,137 @@
+import { StyleSheet } from "react-native";
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
+  },
+  summaryCard: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    margin: 20,
+    padding: 20,
+    borderRadius: 24,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+  },
+  summaryLabel: {
+    fontSize: 14,
+    color: "#6B7280",
+    fontWeight: "600",
+    marginBottom: 4,
+  },
+  summaryAmount: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: "#1A1A1A",
+  },
+  summaryIconContainer: {
+    width: 56,
+    height: 56,
+    backgroundColor: "#F3F4F6",
+    borderRadius: 18,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1A1A1A",
+    marginHorizontal: 20,
+    marginBottom: 12,
+  },
+  expenseList: {
+    paddingHorizontal: 20,
+    paddingBottom: 100,
+  },
+  expenseCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    padding: 16,
+    borderRadius: 20,
+    marginBottom: 12,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 16,
+  },
+  expenseInfo: {
+    flex: 1,
+  },
+  categoryText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1A1A1A",
+    marginBottom: 2,
+  },
+  noteText: {
+    fontSize: 14,
+    color: "#6B7280",
+  },
+  dateText: {
+    fontSize: 12,
+    color: "#9CA3AF",
+    marginTop: 4,
+  },
+  amountText: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#1A1A1A",
+    marginRight: 12,
+  },
+  rightContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  deleteButton: {
+    padding: 8,
+    backgroundColor: "#FEE2E2",
+    borderRadius: 12,
+  },
+  fab: {
+    position: "absolute",
+    bottom: 30,
+    right: 20,
+    backgroundColor: "#6366F1",
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 5,
+    shadowColor: "#6366F1",
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 60,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#9CA3AF",
+    marginTop: 12,
+    fontWeight: "500",
+  },
+});
+
+export default styles;
+

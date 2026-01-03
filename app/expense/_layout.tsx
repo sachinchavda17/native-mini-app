@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import { ExpenseProvider } from "../context/ExpenseContext";
+import ExpenseProvider from "../context/ExpenseContext";
 
 export default function ExpenseLayout() {
   return (
@@ -8,3 +8,4 @@ export default function ExpenseLayout() {
     </ExpenseProvider>
   );
 }
+

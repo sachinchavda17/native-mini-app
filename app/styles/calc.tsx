@@ -3,7 +3,7 @@ import { StyleSheet, Dimensions } from "react-native";
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const BUTTON_SIZE = (SCREEN_WIDTH - 20 * 2 - 6 * 3) / 4;
 
-export const styles = StyleSheet.create({
+const styles = StyleSheet.create({
   display: {
     flex: 1,
     backgroundColor: "#fff",
@@ -39,4 +39,6 @@ export const styles = StyleSheet.create({
     fontWeight: "600",
   },
 });
+
+export default styles;
 

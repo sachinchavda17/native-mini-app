@@ -14,9 +14,10 @@ const STORAGE_KEY = "EXPENSES";
 export const ExpenseContext = createContext<{
   expenses: Expense[];
   addExpense: (expense: Expense) => void;
+  removeExpense: (id: string) => void;
 } | null>(null);
 
-export function ExpenseProvider({ children }: { children: React.ReactNode }) {
+export default function ExpenseProvider({ children }: { children: React.ReactNode }) {
   const [expenses, setExpenses] = useState<Expense[]>([]);
 
   useEffect(() => {
@@ -39,9 +40,10 @@ export function ExpenseProvider({ children }: { children: React.ReactNode }) {
     setExpenses((prev) => [expense, ...prev]);
   };
 
-  return (
-    <ExpenseContext.Provider value={{ expenses, addExpense }}>
-      {children}
-    </ExpenseContext.Provider>
-  );
+  const removeExpense = (id: string) => {
+    setExpenses((prev) => prev.filter((expense) => expense.id !== id));
+  };
+
+  return <ExpenseContext.Provider value={{ expenses, addExpense, removeExpense }}>{children}</ExpenseContext.Provider>;
 }
+

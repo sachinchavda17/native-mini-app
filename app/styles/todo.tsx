@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-export const todoStyles = StyleSheet.create({
+const todoStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f8f9fa",
@@ -93,4 +93,6 @@ export const todoStyles = StyleSheet.create({
     marginTop: 8,
   },
 });
+
+export default todoStyles;
 
