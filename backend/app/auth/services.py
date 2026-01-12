@@ -46,7 +46,13 @@ def login_user(data: UserLogin):
             )
 
         user["_id"] = str(user["_id"])
-        token = create_access_token(user)
+        token = create_access_token(
+            data={
+                "user_id": str(user["_id"]),
+                "email": user["email"],
+            }
+        )
+
         return {"token": token, "message": "Login successful"}
 
     except PyMongoError:

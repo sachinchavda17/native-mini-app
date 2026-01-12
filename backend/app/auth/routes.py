@@ -1,7 +1,7 @@
 from fastapi import APIRouter, status, Depends
 from app.auth.schemas import UserRegister, UserLogin
 from app.auth.services import create_user, login_user
-from app.auth.dependencies import get_current_user
+from app.core.dependancy import get_current_user
 
 router = APIRouter()
 

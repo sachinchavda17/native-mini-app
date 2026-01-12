@@ -2,7 +2,7 @@ from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException
 from app.core.config import JWT_SECRET, JWT_ALGORITHM
 from jose import jwt
-from app.core.database import user_collection
+from app.auth.models import user_collection
 from bson.objectid import ObjectId
 from fastapi import status
 from jose.exceptions import JWTError
@@ -15,6 +15,8 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         user_id = payload.get("user_id")
 
+        print("payload", payload)
+
         if not user_id:
             raise HTTPException(status_code=401, detail="Invalid Token")
 
@@ -23,7 +25,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         if not user:
             raise HTTPException(status_code=401, detail="User not found")
 
-        user["_id"] = str(user["_id"])
+        user["user_id"] = str(user["_id"])
         user.pop("password", None)
         return user
 

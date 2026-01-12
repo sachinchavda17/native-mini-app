@@ -1,51 +1,72 @@
-from fastapi import APIRouter, Depends
-from app.expense.schemas import ExpenseSchema
-from app.expense.model import expense_collection
-from bson.objectid import ObjectId
-from app.auth.dependencies import get_current_user
+from fastapi import APIRouter, Depends, Query
+from typing import List
+from datetime import datetime
+from app.core.dependancy import get_current_user
+from app.expense.schemas import ExpenseUpsertSchema, ExpenseResponseSchema
+from app.expense.services import upsert_expense
+from app.expense.collection import expense_collection
 
 router = APIRouter()
 
 
-@router.post("/expense", Depends(get_current_user))
-async def add_expense(expense: ExpenseSchema):
-    if not expense.amount or not expense.category or not expense.date:
-        return {"message": "All fields are required"}
-    expense_collection.insert_one(expense.model_dump())
-    return {"message": "Expense added successfully"}
+@router.post("/expenses")
+def create_or_update_expense(
+    expense: ExpenseUpsertSchema,
+    current_user=Depends(get_current_user),
+):
+    result = upsert_expense(
+        collection=expense_collection,
+        user_id=current_user["user_id"],
+        expense=expense,
+    )
+
+    return {"status": result}
 
 
-@router.get("/expense")
-async def get_expenses():
+@router.get("/expenses", response_model=List[ExpenseResponseSchema])
+def get_expenses(
+    since: datetime | None = Query(default=None),
+    current_user=Depends(get_current_user),
+):
+    query = {"user_id": current_user["user_id"]}
+
+    if since:
+        query["updated_at"] = {"$gt": since}
+
     expenses = []
-    for expense in expense_collection.find():
-        expense["_id"] = str(expense["_id"])
-        expenses.append(expense)
+
+    for doc in expense_collection.find(query):
+        expenses.append(
+            {
+                "local_id": doc["local_id"],
+                "amount": doc["amount"],
+                "category": doc["category"],
+                "note": doc.get("note"),
+                "date": doc["date"],
+                "updated_at": doc["updated_at"],
+                "is_deleted": doc["is_deleted"],
+            }
+        )
+
     return expenses
 
 
-@router.get("/expense/{id}")
-async def get_expense(id: str):
-    expense = expense_collection.find_one({"_id": ObjectId(id)})
-    if not expense:
-        return {"message": "Expense not found"}
-    expense["_id"] = str(expense["_id"])
-    return expense
+@router.delete("/expenses/{local_id}")
+def delete_expense(
+    local_id: str,
+    current_user=Depends(get_current_user),
+):
+    expense_collection.update_one(
+        {
+            "user_id": current_user["user_id"],
+            "local_id": local_id,
+        },
+        {
+            "$set": {
+                "is_deleted": True,
+                "updated_at": datetime.utcnow(),
+            }
+        },
+    )
 
-
-@router.put("/expense/{id}")
-async def update_expense(id: str, expense: ExpenseSchema):
-    existing_expense = expense_collection.find_one({"_id": ObjectId(id)})
-    if not existing_expense:
-        return {"message": "Expense not found"}
-    expense_collection.update_one({"_id": ObjectId(id)}, {"$set": expense.model_dump()})
-    return {"message": "Expense updated successfully"}
-
-
-@router.delete("/expense/{id}")
-async def delete_expense(id: str):
-    expense = expense_collection.find_one({"_id": ObjectId(id)})
-    if not expense:
-        return {"message": "Expense not found"}
-    expense_collection.delete_one({"_id": ObjectId(id)})
-    return {"message": "Expense deleted successfully"}
+    return {"status": "deleted"}
