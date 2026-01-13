@@ -37,11 +37,10 @@ export default function AddExpenseScreen() {
     }
 
     addExpense({
-      id: Date.now().toString(),
       amount: Number(amount),
       category,
       note,
-      date: date.toISOString().slice(0, 10),
+      date: date.toISOString(),
     });
 
     router.back();

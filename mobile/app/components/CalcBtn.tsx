@@ -1,6 +1,6 @@
 import { Animated, Pressable, Text } from "react-native";
 import { useRef } from "react";
-import { styles } from "../styles/calc";
+import styles  from "../styles/calc";
 
 export default function CalcButton({ label, onPress, isEqual }: { label: string; onPress: () => void; isEqual?: boolean }) {
   const scale = useRef(new Animated.Value(1)).current;

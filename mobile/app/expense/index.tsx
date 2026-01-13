@@ -47,7 +47,7 @@ const ExpenseScreen = () => {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.expenseList}>
         {expenses.length > 0 ? (
           expenses.map((expense) => (
-            <View key={expense.id} style={styles.expenseCard}>
+            <View key={expense.local_id} style={styles.expenseCard}>
               {renderIcon(expense.category)}
               <View style={styles.expenseInfo}>
                 <Text style={styles.categoryText}>{expense.category}</Text>
@@ -56,7 +56,7 @@ const ExpenseScreen = () => {
                     {expense.note}
                   </Text>
                 ) : null}
-                <Text style={styles.dateText}>{expense.date}</Text>
+                <Text style={styles.dateText}>{expense.date.split("T")[0]}</Text>
               </View>
               <View style={styles.rightContainer}>
                 <Text style={styles.amountText}>₹{expense.amount.toLocaleString()}</Text>
@@ -68,7 +68,7 @@ const ExpenseScreen = () => {
                       {
                         text: "Delete",
                         style: "destructive",
-                        onPress: () => removeExpense(expense.id),
+                        onPress: () => removeExpense(expense.local_id),
                       },
                     ]);
                   }}

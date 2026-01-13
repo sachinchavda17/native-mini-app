@@ -3,7 +3,7 @@ import { Stack } from "expo-router";
 import { useRef, useState } from "react";
 import { Animated, Text, View } from "react-native";
 import CalcButton from "../components/CalcBtn";
-import { styles } from "../styles/calc";
+import styles from "../styles/calc";
 
 export default function CalculatorScreen() {
   const [expression, setExpression] = useState("");

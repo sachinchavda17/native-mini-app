@@ -4,7 +4,7 @@ import * as Haptics from "expo-haptics";
 import { Stack } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Animated, FlatList, Pressable, Text, TextInput, View } from "react-native";
-import { todoStyles } from "../styles/todo";
+import todoStyles from "../styles/todo";
 
 interface Task {
   id: string;
