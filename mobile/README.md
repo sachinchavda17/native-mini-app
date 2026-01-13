@@ -1,7 +1,23 @@
 # 📱 Native Mini App – Mini Apps Collection
 
 A collection of small, useful Android apps built using **React Native + Expo**.  
-This project is focused on learning **real-world mobile app architecture**, navigation, state management, and offline persistence.
+This project is focused on learning **real-world mobile app architecture**, navigation, state management, and offline-first data synchronization.
+
+---
+
+## 🆕 New Features (v1.2.0)
+
+### 🔐 Multi-User Authentication
+
+- **Secure Access**: Premium Login and Registration screens.
+- **Session Management**: JWT-based authentication with persistent tokens.
+
+### ☁️ Cloud Sync & Offline-First
+
+- **Smart Synchronization**: Adds full sync between Mobile and Backend (FastAPI).
+- **Conflict Handling**: Uses `updated_at` timestamps to ensure the latest data is preserved.
+- **Network Awareness**: Real-time detection of connectivity changes using `@react-native-community/netinfo`.
+- **Background Sync**: Queues local changes while offline and pushes them automatically when the connection is restored.
 
 ---
 
@@ -14,23 +30,40 @@ This project is focused on learning **real-world mobile app architecture**, navi
 - **Visual Feedback**: Strikethrough and checkmark effects for completed tasks.
 - **Persistence**: Full offline support using **AsyncStorage** to keep your tasks safe.
 - **Interactive**: Haptic feedback and spring animations for a premium feel.
-- **Empty State**: Friendly guidance when no tasks are present.
 
 ### 🧮 Calculator
 
 - **Full Expression Evaluator**: Supports complex chained operations (e.g., `5 + 2 * 3`).
 - **Smart Display**: Clean history vs. main result layout with auto-shrinking text.
 - **Advanced Logic**: Handles operator switching, percentages, and division by zero errors.
-- **UI Protection**: 15-character input limit to prevent layout overflow.
 - **Premium Feel**: Haptic feedback and scale animations on every button press.
 
 ### 💸 Expense Tracker
 
 - **Premium UI**: Modern summary card, category-specific icons, and a floating action button (FAB).
+- **Cloud Powered**: Seamlessly syncs your expenses across devices.
 - **Smart Tracking**: Add daily expenses with an intuitive category grid selection and date picker.
-- **Management**: View recent transactions in a clean list and **delete expenses** with a native confirmation dialog.
+- **Management**: View recent transactions in a clean list and **delete expenses** with soft-delete sync.
 - **Calculations**: Automatic real-time total expense calculation.
-- **Persistence**: Full offline persistence using **AsyncStorage**.
+
+---
+
+## 🏗️ Tech Stack
+
+### Frontend (Mobile)
+
+- **React Native** & **Expo**
+- **Expo Router** (File-based navigation)
+- **Context API** (State orchestration)
+- **AsyncStorage** (Local persistence)
+- **Reanimated** (Fluid UI transitions)
+- **NetInfo** (Network status)
+
+### Backend (Cloud)
+
+- **FastAPI** (Python High-performance Web Framework)
+- **MongoDB** (NoSQL Database)
+- **JWT** (Secure Authentication tokens)
 
 ---
 
@@ -44,52 +77,21 @@ Download the latest Android APK from GitHub Releases:
 
 ---
 
-### 📲 Installation Steps
-
-1. Download the APK from the link above
-2. Open the APK file on your Android device
-3. Enable **“Install unknown apps”** when prompted
-4. Install and open the app
-
----
-
-## 🧠 Architecture Highlights
-
-- **Expo Router**: File-based navigation for a clean app structure.
-- **Context API**: Centralized state management for features like Expenses.
-- **AsyncStorage**: Reliable offline persistence for all user data.
-- **Centralized Styling**: Modular style definitions separated from components for better maintainability.
-- **Feature-scoped Layouts**: Using Expo Router layouts to wrap features with necessary providers.
-
-## 📁 Project Structure
-
-```bash
-app/
-├─ index.tsx              # App launcher (Home)
-├─ todo/                  # Todo mini app
-├─ calculator/            # Calculator mini app
-├─ expense/               # Expense tracker
-├─ context/               # Context providers (Expense, etc.)
-├─ styles/                # Centralized modular styles
-└─ constants/             # App-wide constants
-```
-
----
-
-## 🛠️ Tech Stack
-
-- React Native
-- Expo
-- Expo Router
-- AsyncStorage
-- Context API
-- Expo Vector Icons
-
----
-
 ## ▶️ Run Locally
 
+### 1. Start Backend
+
 ```bash
+cd backend
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
+
+### 2. Start Mobile
+
+```bash
+cd mobile
+npm install
 npx expo start
 ```
 
