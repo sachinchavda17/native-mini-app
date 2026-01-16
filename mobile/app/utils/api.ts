@@ -1,19 +1,16 @@
-import Constants from "expo-constants";
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
-const API_URL ="http://127.0.0.1:8000"
-
+if (!API_URL) {
+  throw new Error("API URL not defined");
+}
 
 let authToken = "";
 
 export function setAuthToken(token: string) {
-  
   authToken = token;
 }
 
-export async function apiFetch(
-  endpoint: string,
-  options: RequestInit = {}
-) {
+export async function apiFetch(endpoint: string, options: RequestInit = {}) {
   const headers: HeadersInit = {
     "Content-Type": "application/json",
     ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
